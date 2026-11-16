@@ -14,7 +14,10 @@
 | PWA bằng `vite-plugin-pwa` | Cài lên điện thoại, chạy offline |
 | `HashRouter` | Chạy được trên hosting tĩnh, không cần cấu hình máy chủ |
 | Lưu `localStorage` qua interface `ProgressRepository` | Demo không cần máy chủ; đổi sang Supabase chỉ thay 1 lớp |
-| Lịch ôn SM-2 rút gọn (4 mức) | Đơn giản, đã được kiểm chứng, tự viết, có test |
+| Lịch ôn SM-2 rút gọn (4 mức), xê dịch ±5%, trần 365 ngày | Đơn giản, đã được kiểm chứng, tự viết, có test |
+| Ôn tập 6 kiểu, chọn kiểu theo mức nhớ (nhận ra → nhớ ra); kết quả tự quy đổi sang Quên/Khó/Nhớ/Dễ | Nhớ ra hiệu quả hơn lật thẻ; không bắt người học tự chấm mọi lúc |
+| Từ quên quay lại sau 4 thẻ, lượt học lại không ghi lịch | Củng cố ngay mà không kéo lệch khoảng ôn |
+| "Luyện thêm" không đổi lịch ôn | Ôn sớm ngoài lịch làm sai lệch khoảng cách ngắt quãng |
 | Phát âm bằng Web Speech API | Miễn phí; chất lượng tùy thiết bị |
 | Chấm luyện viết bằng quy tắc (độ dài + cụm từ) | Chưa dùng AI API trả phí; chỉ là gợi ý, không chấm ngữ pháp |
 | Bài đạt khi ≥ 60% bài tập | Ngưỡng tạm; có thể chỉnh `PASS_RATIO` |
@@ -39,7 +42,8 @@ src/
     lesson-email.ts        Bài mẫu 1 (đầy đủ)
     lesson-variance.ts     Bài mẫu 2 (đầy đủ)
   lib/
-    srs.ts                 Thuật toán lịch ôn
+    srs.ts                 Thuật toán lịch ôn, từ khó, dự báo
+    review.ts              Kiểu ôn, dựng câu hỏi, chấm gõ, quy đổi mức, hàng đợi phiên ôn
     exercises.ts           Chấm điền từ, sắp xếp, luyện viết
     stats.ts               Thống kê, chuỗi ngày, định dạng thời gian
     storage.ts             Interface + LocalStorageRepository
@@ -56,6 +60,7 @@ src/
     dictionary.ts          Tra phiên âm, từ loại, nghĩa (dịch vụ miễn phí)
     stopwords.ts           Danh sách từ bỏ qua
   pages/                   Dashboard, Programs, LessonPage, Review, ExercisePage, History, ImportPage
+components/ReviewQuestion.tsx  Giao diện từng kiểu câu hỏi ôn tập
   test/                    Kiểm thử (SRS, chấm bài, nội dung, luồng giao diện)
 public/                    Biểu tượng PWA
 ```
@@ -70,6 +75,10 @@ Xem README.md, mục "Đồng bộ nhiều thiết bị". Sơ đồ: dữ liệu
 Khi thương mại hóa: bật xác nhận email + SMTP riêng, thêm "quên mật khẩu", thêm bảng riêng cho từng loại dữ liệu nếu một dòng jsonb quá lớn.
 
 ## Hạn chế đã biết
+- Ôn tập: dùng SM-2 rút gọn, chưa phải FSRS và chưa hiệu chỉnh theo dữ liệu của bạn. Hiệu quả thực tế cần vài tuần dùng mới đánh giá được.
+- Chấm gõ không nhận từ đồng nghĩa; "gần đúng" chỉ cho từ từ 5 ký tự (sai 1 ký tự).
+- Câu điền chỗ trống chỉ có khi ví dụ chứa từ (chấp nhận biến thể ngắn như attach → attached); dạng bất quy tắc (overspend → overspent) sẽ không có kiểu này.
+- Kiểu "Nghe và gõ" phụ thuộc giọng đọc của thiết bị, chưa thử trên thiết bị thật; trình duyệt có thể chặn tự phát âm (bấm "Nghe lại").
 - 28/30 bài mới là danh mục, chưa có nội dung.
 - Luyện viết chưa kiểm tra ngữ pháp.
 - Đồng bộ mới kiểm thử bằng kho giả và client giả, **chưa chạy với Supabase thật** (cần dự án Supabase của chủ dự án).
@@ -97,3 +106,4 @@ Khi thương mại hóa: bật xác nhận email + SMTP riêng, thêm "quên m�
 - 2026-11-16: Thêm tính năng nhập từ từ PDF/Word/Excel/CSV/TXT. 29 kiểm thử đạt; đã thử file thật trên Chromium.
 - 2026-11-16: Thêm trích cụm từ (2–3 từ) và bảng thuật ngữ tài chính tự soạn.
 - 2026-11-16: Thêm đồng bộ Supabase, gộp dữ liệu, sao lưu file. 63+ kiểm thử đạt; chưa thử với Supabase thật.
+- 2026-11-16: Ôn tập đa dạng 6 kiểu, hàng đợi học lại, luyện thêm, dự báo 7 ngày. 101 kiểm thử đạt; đã chạy đủ 6 kiểu trên Chromium.

@@ -6,9 +6,8 @@
 
 - Tổng quan: tiến độ, thời gian học hôm nay, chuỗi ngày, bài học hôm nay.
 - 2 chương trình, 30 bài (15 Office English, 15 Professional Finance English). 2 bài đã đủ nội dung: *Professional Email Writing*, *Budget Variance Analysis*.
-- Flashcards: từ vựng, phiên âm, từ loại, nghĩa, ví dụ, phát âm (giọng đọc của trình duyệt).
+- **Ôn tập đa dạng** với lặp lại ngắt quãng, 6 kiểu: chọn nghĩa, chọn từ, điền vào câu, gõ từ, nghe và gõ, flashcard tự chấm. Từ vựng có phiên âm, từ loại, nghĩa, ví dụ, phát âm (giọng đọc của trình duyệt).
 - Bài tập: trắc nghiệm, điền từ, sắp xếp câu, luyện viết (chấm theo quy tắc, không dùng AI).
-- Lịch ôn tự động (thuật toán SM-2 rút gọn): Quên / Khó / Nhớ / Dễ.
 - **Đồng bộ nhiều thiết bị** (Supabase) và **sao lưu/khôi phục bằng file**.
 - Lịch sử, điểm số, thời lượng thực tế (chỉ tính khi tab đang mở).
 - **Nhập từ từ tài liệu**: tải PDF, Word (.docx), Excel (.xlsx), CSV, TXT → tự chọn từ mới, tra phiên âm/từ loại/nghĩa, bạn sửa rồi thêm vào lịch ôn.
@@ -41,6 +40,25 @@ Mở bản đã triển khai bằng Chrome (Android) hoặc Safari (iPhone) → 
 PWA cần địa chỉ HTTPS. Dự án có sẵn workflow `.github/workflows/deploy.yml`: mỗi lần gộp vào `main`, GitHub chạy kiểm thử, build và đưa lên GitHub Pages.
 Địa chỉ: `https://yvonnetrinhvan-tv.github.io/business-english-academy/`
 Lần đầu: vào **Settings → Pages → Source** chọn **GitHub Actions**.
+
+## Ôn tập: cách hoạt động
+
+Tab **Ôn tập** có hai chế độ.
+
+**Phiên ôn tính lịch** (ảnh hưởng lịch ngắt quãng)
+- Thẻ quá hạn lâu nhất ôn trước. Từ mới xen kẽ (cứ 3 thẻ ôn thì 1 từ mới).
+- Từ mới: xem đầy đủ → sau vài thẻ được kiểm tra bằng trắc nghiệm.
+- Kiểu câu hỏi **khó dần theo mức nhớ** (chế độ "Tự động"): nhận ra (chọn nghĩa) → nhớ ra (điền câu, gõ từ, nghe và gõ). Nhớ ra khó hơn nhận ra, củng cố trí nhớ mạnh hơn.
+- Trả lời **sai**: ghi "quên" một lần, thẻ quay lại sau 4 thẻ ở dạng trắc nghiệm ("Học lại"). Đúng ở lượt học lại thì thoát, không ghi thêm (tránh kéo dài khoảng ôn ngay sau khi vừa quên).
+- Quy đổi kết quả sang mức lịch ôn: sai → Quên; gần đúng (sai 1 ký tự) hoặc dùng gợi ý → Khó; gõ/nghe/điền đúng trong 6 giây không gợi ý → Dễ; còn lại đúng → Nhớ.
+- Khoảng ôn: 1 ngày → 3 ngày → nhân theo hệ số dễ nhớ; xê dịch ngẫu nhiên ±5% từ 3 ngày (tránh dồn thẻ vào một ngày); tối đa 365 ngày.
+- **Từ khó**: quên từ 4 lần trở lên, luôn được ôn bằng kiểu dễ và hiện trong danh sách cần chú ý.
+
+**Luyện thêm** (không đổi lịch ôn): ôn thêm từ còn yếu hoặc tất cả từ đã học, bất cứ lúc nào. Không làm lệch lịch ngắt quãng.
+
+Màn hình chính còn cho xem dự báo số thẻ đến hạn 7 ngày tới, phân bố mức ghi nhớ và tỷ lệ nhớ đúng gần đây.
+
+Phím tắt: bấm 1–4 để chọn đáp án trắc nghiệm; Enter để gửi câu gõ hoặc sang câu kế.
 
 ## Nhập từ từ tài liệu
 

@@ -69,17 +69,4 @@ describe('ứng dụng', () => {
       expect(saved.sessions[0].seconds).toBeGreaterThanOrEqual(1)
     })
   })
-
-  it('flashcards: lật thẻ, chấm Nhớ, lưu lịch ôn', async () => {
-    const user = userEvent.setup()
-    const repo = setup('/on-tap')
-    await user.click(await screen.findByRole('button', { name: 'Hiện đáp án' }))
-    await user.click(screen.getByRole('button', { name: /^Nhớ/ }))
-    await waitFor(async () => {
-      const saved = await repo.load()
-      const cards = Object.values(saved.cards)
-      expect(cards).toHaveLength(1)
-      expect(cards[0].intervalDays).toBe(1)
-    })
-  })
 })

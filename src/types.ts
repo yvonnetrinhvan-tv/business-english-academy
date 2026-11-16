@@ -65,7 +65,7 @@ export interface CardState {
   lastReviewed?: string
 }
 
-export type SessionKind = 'lesson' | 'flashcards' | 'exercises'
+export type SessionKind = 'lesson' | 'flashcards' | 'review' | 'exercises'
 
 export interface StudySession {
   id: string

@@ -5,7 +5,7 @@ import { averageScore, formatDuration, totalSeconds } from '../lib/stats'
 import { getLesson } from '../data/lessons'
 import SyncPanel from '../components/SyncPanel'
 
-const kindLabel = { lesson: 'Đọc bài', flashcards: 'Flashcards', exercises: 'Bài tập' } as const
+const kindLabel = { lesson: 'Đọc bài', flashcards: 'Flashcards', review: 'Ôn tập', exercises: 'Bài tập' } as const
 
 export default function History() {
   const { state, setDailyGoal, resetAll } = useStore()
