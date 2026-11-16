@@ -36,7 +36,7 @@ function Home({ onStart }: { onStart: (c: RunConfig) => void }) {
   const { state, vocab } = useStore()
   const [limit, setLimit] = useState(20)
   const [newLimit, setNewLimit] = useState(10)
-  const [forced, setForced] = useState<Forced>('auto')
+  const [forced, setForced] = useState<Forced>('type')
   const [scope, setScope] = useState<PracticeScope>('weak')
   const now = new Date()
 
@@ -89,11 +89,11 @@ function Home({ onStart }: { onStart: (c: RunConfig) => void }) {
               {[0, 1, 5, 10, 20].map((n) => <option key={n} value={n}>{n}</option>)}</select></label>
           <label className="flex items-center justify-between gap-2 sm:block">Kiểu ôn
             <select aria-label="Kiểu ôn" value={forced} onChange={(e) => setForced(e.target.value as Forced)} className={`${sel} sm:mt-1 sm:w-full`}>
-              <option value="auto">Tự động (khuyên dùng)</option>
-              <option value="type">{TYPE_ONLY_LABEL}</option>
+              <option value="type">{TYPE_ONLY_LABEL} (mặc định)</option>
+              <option value="auto">Tự động (trắc nghiệm → gõ)</option>
               {(Object.keys(MODE_LABEL) as Mode[]).filter((m) => m !== 'listening' || canSpeak()).map((m) => <option key={m} value={m}>{MODE_LABEL[m]}</option>)}</select></label>
         </div>
-        <p className="mt-2 text-xs text-slate-500">“Tự động”: từ mới làm trắc nghiệm, từ đã nhớ lâu chuyển sang điền câu, gõ từ và nghe. Từ quên sẽ quay lại sau vài thẻ. Chọn “Gõ tiếng Anh theo nghĩa tiếng Việt” nếu muốn mọi thẻ đều tự gõ đáp án, không có trắc nghiệm.</p>
+        <p className="mt-2 text-xs text-slate-500">Mặc định: mọi thẻ tự gõ đáp án (gõ từ theo nghĩa hoặc điền câu), không có trắc nghiệm. Chọn “Tự động” nếu muốn từ mới làm trắc nghiệm trước, từ nhớ lâu mới chuyển sang gõ và nghe. Từ quên sẽ quay lại sau vài thẻ.</p>
         <div className="mt-3"><Btn disabled={total === 0} onClick={() => onStart({ items: plan.items, practice: false, forced })}>Bắt đầu ôn ({total} thẻ)</Btn></div>
       </Card>
 
