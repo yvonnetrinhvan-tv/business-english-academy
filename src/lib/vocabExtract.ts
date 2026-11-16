@@ -5,13 +5,19 @@ export interface Candidate {
   term: string
   count: number
   exampleEn: string
+  kind: 'word' | 'phrase'
 }
 
 export interface ExtractOptions {
   /** Từ đã có (bỏ qua), viết thường */
   known?: Set<string>
+  /** Số từ đơn tối đa */
   max?: number
+  /** Số cụm từ tối đa (0 = không trích cụm) */
+  maxPhrases?: number
   minLength?: number
+  /** Cụm phải xuất hiện ít nhất bấy nhiêu lần */
+  minPhraseCount?: number
 }
 
 const WORD_RE = /[A-Za-z][A-Za-z'’-]*[A-Za-z]|[A-Za-z]/g
@@ -31,7 +37,7 @@ export function splitSentences(text: string): string[] {
  * - Gắn câu ví dụ đầu tiên (20–220 ký tự) có chứa từ đó.
  */
 export function extractCandidates(text: string, opts: ExtractOptions = {}): Candidate[] {
-  const { known = new Set<string>(), max = 60, minLength = 4 } = opts
+  const { known = new Set<string>(), max = 50, maxPhrases = 30, minLength = 4, minPhraseCount = 2 } = opts
   const stats = new Map<string, { count: number; capMid: number; lower: number }>()
 
   for (const m of text.matchAll(WORD_RE)) {
@@ -63,25 +69,99 @@ export function extractCandidates(text: string, opts: ExtractOptions = {}): Cand
     }
   }
 
-  const words = [...stats]
+  const phrases = maxPhrases > 0 ? extractPhrases(text, known, minPhraseCount, maxPhrases) : []
+
+  // Bỏ từ đơn luôn xuất hiện bên trong một cụm đã chọn (vd. "trail" luôn nằm trong "audit trail")
+  const insidePhrase = (w: string, count: number) =>
+    phrases.some((p) => p.count >= count && p.term.split(' ').some((t) => t === w || t + 's' === w || t === w + 's'))
+
+  const words: Candidate[] = [...stats]
     .filter(([, s]) => !(s.capMid > 0 && s.lower === 0)) // tên riêng
+    .filter(([w, s]) => !insidePhrase(w, s.count))
     .sort((a, b) => b[1].count - a[1].count || b[0].length - a[0].length || a[0].localeCompare(b[0]))
     .slice(0, max)
-    .map(([w, s]) => ({ term: w, count: s.count, exampleEn: '' }))
+    .map(([w, s]) => ({ term: w, count: s.count, exampleEn: '', kind: 'word' as const }))
 
-  const pending = new Map(words.map((c) => [c.term, c]))
+  const all = [...phrases, ...words].sort(
+    (a, b) => b.count * (b.kind === 'phrase' ? 1.5 : 1) - a.count * (a.kind === 'phrase' ? 1.5 : 1) || b.term.length - a.term.length,
+  )
+
+  const pending = new Map(all.map((c) => [c.term, c]))
   for (const sentence of splitSentences(text)) {
     if (!pending.size) break
     if (sentence.length < 20 || sentence.length > 220) continue
+    const lower = sentence.toLowerCase()
     const toks = new Set([...sentence.matchAll(WORD_RE)].map((m) => m[0].toLowerCase()))
     for (const [term, c] of pending) {
-      if (toks.has(term) || toks.has(term + 's')) {
+      const hit = c.kind === 'phrase' ? new RegExp(`(^|[^a-z])${escapeRe(term)}s?([^a-z]|$)`).test(lower) : toks.has(term) || toks.has(term + 's')
+      if (hit) {
         c.exampleEn = sentence
         pending.delete(term)
       }
     }
   }
-  return words
+  return all
+}
+
+const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+/**
+ * Trích cụm 2–3 từ liền nhau (vd. "audit trail", "month-end close").
+ * Quy tắc: mọi từ trong cụm là từ nội dung (không phải từ phổ biến, ≥3 ký tự), không bị ngắt bởi dấu câu,
+ * lặp ít nhất minCount lần, không phải tên riêng. Cụm con bị bỏ nếu luôn nằm trong cụm dài hơn.
+ */
+function extractPhrases(text: string, known: Set<string>, minCount: number, max: number): Candidate[] {
+  type Tok = { w: string; cap: boolean; sentStart: boolean; ok: boolean; end: number; start: number }
+  const toks: Tok[] = []
+  for (const m of text.matchAll(WORD_RE)) {
+    const raw = m[0].replace(/[’]/g, "'")
+    const i = m.index ?? 0
+    const before = text.slice(Math.max(0, i - 3), i).trimEnd()
+    const w = raw.toLowerCase()
+    toks.push({
+      w,
+      cap: raw[0] !== raw[0].toLowerCase(),
+      sentStart: before === '' || /[.!?:\n]$/.test(before) || i === 0,
+      ok: raw.length >= 3 && !(raw === raw.toUpperCase() && raw.length > 1) && !STOPWORDS.has(w) && !w.includes("'"),
+      start: i,
+      end: i + raw.length,
+    })
+  }
+
+  const map = new Map<string, { count: number; allProper: boolean }>()
+  let run: Tok[] = []
+  const flush = () => {
+    for (let n = 2; n <= 3; n++) {
+      for (let i = 0; i + n <= run.length; i++) {
+        const g = run.slice(i, i + n)
+        const term = g.map((t) => t.w).join(' ')
+        if (known.has(term)) continue
+        const proper = g.every((t) => t.cap) && g.some((t) => !t.sentStart || g.indexOf(t) > 0)
+        const e = map.get(term) ?? { count: 0, allProper: true }
+        e.count++
+        if (!proper) e.allProper = false
+        map.set(term, e)
+      }
+    }
+    run = []
+  }
+  toks.forEach((t, idx) => {
+    const prev = toks[idx - 1]
+    const gap = prev ? text.slice(prev.end, t.start) : ''
+    const contiguous = !prev || /^ +$/.test(gap)
+    if (!t.ok) return flush()
+    if (!contiguous) flush()
+    run.push(t)
+  })
+  flush()
+
+  const kept = [...map].filter(([, e]) => e.count >= minCount && !e.allProper)
+  // Bỏ cụm con có cùng số lần với cụm dài hơn chứa nó
+  const finals = kept.filter(([t, e]) => !kept.some(([o, oe]) => o !== t && o.length > t.length && oe.count >= e.count && (` ${o} `).includes(` ${t} `)))
+  return finals
+    .sort((a, b) => b[1].count - a[1].count || b[0].length - a[0].length || a[0].localeCompare(b[0]))
+    .slice(0, max)
+    .map(([term, e]) => ({ term, count: e.count, exampleEn: '', kind: 'phrase' as const }))
 }
 
 // ---------- Bảng từ vựng (Excel / CSV) ----------

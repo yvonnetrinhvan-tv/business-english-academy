@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { extractCandidates, parseVocabTable } from '../lib/vocabExtract'
 import { lookupWord, mapPool } from '../lib/dictionary'
 import { parseCsv } from '../lib/fileText'
+import { glossaryLookup } from '../data/glossary'
 
 const TEXT = `The Finance Controller reviewed the accrual schedule. The accrual was posted late.
 Variances above 5% need approval. Each variance must be explained by the Marketing team.
@@ -27,6 +28,42 @@ describe('trích từ từ văn bản', () => {
   })
   it('gắn câu ví dụ chứa từ', () => {
     expect(c.find((x) => x.term === 'shortfall')?.exampleEn).toContain('shortfall in cash')
+  })
+})
+
+describe('trích cụm từ', () => {
+  const T = `Keep an audit trail for every entry. The audit trail shows who posted the entry.
+The month-end close starts early. We finish the month-end close in three days.
+Internal controls matter. Internal controls reduce risk. Every journal entry needs approval.`
+  const c = extractCandidates(T)
+  const phrases = c.filter((x) => x.kind === 'phrase').map((x) => x.term)
+
+  it('lấy cụm 2 từ lặp lại', () => {
+    expect(phrases).toContain('audit trail')
+    expect(phrases).toContain('month-end close')
+    expect(phrases).toContain('internal controls')
+  })
+  it('bỏ cụm chỉ xuất hiện 1 lần và cụm có từ phổ biến', () => {
+    expect(phrases).not.toContain('journal entry')
+    expect(phrases.some((p) => p.split(' ').includes('the') || p.split(' ').includes('for'))).toBe(false)
+  })
+  it('không lặp từ đơn luôn nằm trong cụm', () => {
+    const words = c.filter((x) => x.kind === 'word').map((x) => x.term)
+    expect(words).not.toContain('trail')
+    expect(words).not.toContain('controls')
+  })
+  it('gắn câu ví dụ chứa cụm', () => {
+    expect(c.find((x) => x.term === 'audit trail')?.exampleEn).toMatch(/audit trail/i)
+  })
+  it('tắt trích cụm khi maxPhrases = 0', () => {
+    expect(extractCandidates(T, { maxPhrases: 0 }).some((x) => x.kind === 'phrase')).toBe(false)
+  })
+  it('bỏ cụm đã biết', () => {
+    expect(extractCandidates(T, { known: new Set(['audit trail']) }).map((x) => x.term)).not.toContain('audit trail')
+  })
+  it('bỏ cụm là tên riêng', () => {
+    const t = 'We met with Blue Harbor yesterday. Blue Harbor agreed. Later Blue Harbor signed.'
+    expect(extractCandidates(t).map((x) => x.term)).not.toContain('blue harbor')
   })
 })
 
@@ -60,6 +97,12 @@ describe('tra từ', () => {
     const f = fakeFetch([{ phonetic: '/əˈkruːəl/', meanings: [{ partOfSpeech: 'noun' }] }], { responseData: { translatedText: 'dồn tích' } })
     expect(await lookupWord('accrual', f as unknown as typeof fetch)).toEqual({ ipa: '/əˈkruːəl/', pos: 'n.', meaningVi: 'dồn tích' })
   })
+  it('cụm từ: bỏ tra từ điển, đặt từ loại phr.', async () => {
+    const f = fakeFetch([{ phonetic: '/x/' }], { responseData: { translatedText: 'dấu vết kiểm toán' } })
+    const r = await lookupWord('audit trail', f as unknown as typeof fetch)
+    expect(r).toEqual({ ipa: '', pos: 'phr.', meaningVi: 'dấu vết kiểm toán' })
+    expect(f.mock.calls.some(([u]) => String(u).includes('dictionaryapi'))).toBe(false)
+  })
   it('lỗi mạng không làm hỏng, trả rỗng', async () => {
     const f = vi.fn(async () => { throw new Error('offline') })
     expect(await lookupWord('x', f as unknown as typeof fetch)).toEqual({ ipa: '', pos: '', meaningVi: '' })
@@ -70,5 +113,14 @@ describe('tra từ', () => {
   })
   it('mapPool giữ thứ tự kết quả', async () => {
     expect(await mapPool([1, 2, 3, 4, 5], 2, async (n) => n * 2)).toEqual([2, 4, 6, 8, 10])
+  })
+})
+
+describe('bảng thuật ngữ', () => {
+  it('tra đúng thuật ngữ và dạng số nhiều', () => {
+    expect(glossaryLookup('Audit trail')).toBe('dấu vết kiểm toán')
+    expect(glossaryLookup('variances')).toBe('chênh lệch')
+    expect(glossaryLookup('operating expense')).toBe('chi phí hoạt động')
+    expect(glossaryLookup('zzz')).toBeUndefined()
   })
 })
