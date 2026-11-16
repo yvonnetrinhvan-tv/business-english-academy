@@ -38,7 +38,7 @@ Mở địa chỉ hiện ra (thường là http://localhost:5173).
 
 Mở bản đã triển khai bằng Chrome (Android) hoặc Safari (iPhone) → "Thêm vào màn hình chính".
 PWA cần địa chỉ HTTPS. Dự án có sẵn workflow `.github/workflows/deploy.yml`: mỗi lần gộp vào `main`, GitHub chạy kiểm thử, build và đưa lên GitHub Pages.
-Địa chỉ: `https://yvonnetrinhvan-tv.github.io/business-english-academy/`
+Địa chỉ: [yvonnetrinhvan-tv.github.io/business-english-academy](https://yvonnetrinhvan-tv.github.io/business-english-academy/)
 Lần đầu: vào **Settings → Pages → Source** chọn **GitHub Actions**.
 
 ## Ôn tập: cách hoạt động
