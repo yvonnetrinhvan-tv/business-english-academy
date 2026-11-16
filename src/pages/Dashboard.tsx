@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { Card, PageTitle, ProgressBar, Btn } from '../components/ui'
 import { useStore } from '../lib/store'
 import { lessons } from '../data/lessons'
-import { isDue, mastery } from '../lib/srs'
+import { isNewCard, isReviewDue, mastery } from '../lib/srs'
 import { formatDuration, last7Days, secondsOnDay, streak } from '../lib/stats'
 
 const dow = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']
@@ -14,8 +14,8 @@ export default function Dashboard() {
   const goalSec = state.dailyGoalMinutes * 60
   const week = last7Days(state.sessions, now)
   const maxWeek = Math.max(goalSec, ...week.map((d) => d.seconds))
-  const dueCount = Object.values(state.cards).filter((c) => isDue(c, now)).length
-  const newCount = allVocab.filter((v) => !state.cards[v.id]).length
+  const dueCount = Object.values(state.cards).filter((c) => isReviewDue(c, now)).length
+  const newCount = allVocab.filter((v) => isNewCard(state.cards[v.id])).length
   const learned = allVocab.filter((v) => ['familiar', 'mastered'].includes(mastery(state.cards[v.id]))).length
   const today = lessons.find((l) => l.content && !state.completedLessons.includes(l.id))
   const done = state.completedLessons.length
@@ -48,7 +48,7 @@ export default function Dashboard() {
         <Card>
           <h2 className="font-semibold">Ôn từ vựng</h2>
           <p className="mt-2 text-sm">Đến hạn ôn: <b>{dueCount}</b> · Từ mới: <b>{newCount}</b></p>
-          <div className="mt-3"><Link to="/on-tap"><Btn variant={dueCount + newCount ? 'primary' : 'ghost'}>Mở flashcards</Btn></Link></div>
+          <div className="mt-3"><Link to="/on-tap"><Btn variant={dueCount + newCount ? 'primary' : 'ghost'}>Ôn tập</Btn></Link></div>
         </Card>
 
         <Card>

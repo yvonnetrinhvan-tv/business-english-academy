@@ -10,7 +10,7 @@ import ImportPage from './pages/ImportPage'
 const nav = [
   { to: '/', label: 'Tổng quan', icon: '🏠', end: true },
   { to: '/chuong-trinh', label: 'Chương trình', icon: '📚' },
-  { to: '/on-tap', label: 'Ôn từ', icon: '🃏' },
+  { to: '/on-tap', label: 'Ôn tập', icon: '🃏' },
   { to: '/nhap-tu', label: 'Nhập từ', icon: '📥' },
   { to: '/lich-su', label: 'Lịch sử', icon: '📈' },
 ]

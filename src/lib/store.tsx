@@ -120,7 +120,7 @@ export function StoreProvider({ children, repo = defaultRepo, sync = disabledSyn
         update((s) => {
           const now = new Date()
           const cur: CardState = s.cards[vocabId] ?? newCard(vocabId, now)
-          return { ...s, cards: { ...s.cards, [vocabId]: review(cur, grade, now) } }
+          return { ...s, cards: { ...s.cards, [vocabId]: review(cur, grade, now, { fuzz: Math.random }) } }
         }),
       ensureCards: (ids) =>
         update((s) => {
