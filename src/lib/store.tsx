@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import type { CardState, Grade, ProgressState, StudySession } from '../types'
+import type { CardState, Grade, ProgressState, StudySession, VocabItem } from '../types'
+import { allVocab } from '../data/lessons'
 import { emptyState, type ProgressRepository } from './storage'
 import { repository as defaultRepo } from './repository'
 import { newCard, review } from './srs'
@@ -13,6 +14,10 @@ interface Store {
   completeLesson: (lessonId: string) => void
   saveWriting: (exerciseId: string, text: string) => void
   setDailyGoal: (minutes: number) => void
+  addCustomVocab: (items: VocabItem[]) => void
+  removeCustomVocab: (id: string) => void
+  /** Từ trong bài học + từ người học tự nhập */
+  vocab: VocabItem[]
   resetAll: () => Promise<void>
 }
 
@@ -62,6 +67,29 @@ export function StoreProvider({ children, repo = defaultRepo }: { children: Reac
         update((s) => (s.completedLessons.includes(id) ? s : { ...s, completedLessons: [...s.completedLessons, id] })),
       saveWriting: (id, text) => update((s) => ({ ...s, writings: { ...s.writings, [id]: text } })),
       setDailyGoal: (m) => update((s) => ({ ...s, dailyGoalMinutes: m })),
+      addCustomVocab: (items) =>
+        update((s) => {
+          const have = new Set([...allVocab, ...s.customVocab].map((v) => v.term.toLowerCase()))
+          const fresh: VocabItem[] = []
+          for (const it of items) {
+            const k = it.term.toLowerCase()
+            if (have.has(k)) continue
+            have.add(k)
+            fresh.push(it)
+          }
+          if (!fresh.length) return s
+          const now = new Date()
+          const cards = { ...s.cards }
+          fresh.forEach((v) => { if (!cards[v.id]) cards[v.id] = newCard(v.id, now) })
+          return { ...s, customVocab: [...s.customVocab, ...fresh], cards }
+        }),
+      removeCustomVocab: (id) =>
+        update((s) => {
+          const cards = { ...s.cards }
+          delete cards[id]
+          return { ...s, customVocab: s.customVocab.filter((v) => v.id !== id), cards }
+        }),
+      vocab: [...allVocab, ...state.customVocab],
       resetAll: async () => {
         await repo.reset()
         setState(emptyState())

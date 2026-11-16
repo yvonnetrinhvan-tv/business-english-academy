@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 import { Btn, Card, PageTitle, ProgressBar } from '../components/ui'
 import SpeakButton from '../components/SpeakButton'
 import { useStore } from '../lib/store'
-import { allVocab, getVocab } from '../data/lessons'
 import { isDue, newCard, previewInterval } from '../lib/srs'
 import { useStudyTimer } from '../lib/useStudyTimer'
 import type { Grade } from '../types'
@@ -17,7 +16,7 @@ export default function Review() {
 }
 
 function ReviewSession() {
-  const { state, gradeCard, ensureCards, logSession } = useStore()
+  const { state, gradeCard, ensureCards, logSession, vocab: allVocab } = useStore()
   const timer = useStudyTimer()
 
   // Chụp danh sách ôn một lần khi bắt đầu phiên
@@ -47,7 +46,7 @@ function ReviewSession() {
 
   const total = initial.length
   const currentId = queue[0]
-  const vocab = currentId ? getVocab(currentId) : undefined
+  const vocab = currentId ? allVocab.find((v) => v.id === currentId) : undefined
   const card = currentId ? state.cards[currentId] ?? newCard(currentId, new Date()) : undefined
 
   const finish = () => {
@@ -113,16 +112,16 @@ function ReviewSession() {
 
       <Card className="min-h-64 text-center">
         <p className="text-3xl font-bold">{vocab.term}</p>
-        <p className="mt-1 text-slate-500">{vocab.ipa} · {vocab.pos}</p>
+        <p className="mt-1 text-slate-500">{[vocab.ipa, vocab.pos].filter(Boolean).join(' · ')}</p>
         <div className="mt-2 flex justify-center gap-2">
           <SpeakButton text={vocab.term} label="Nghe từ" />
-          <SpeakButton text={vocab.exampleEn} label="Nghe câu" />
+          {vocab.exampleEn && <SpeakButton text={vocab.exampleEn} label="Nghe câu" />}
         </div>
         {flipped ? (
           <div className="mt-4 space-y-2 text-left">
             <p className="text-xl font-semibold text-brand-700">{vocab.meaningVi}</p>
-            <p>{vocab.exampleEn}</p>
-            <p className="text-sm text-slate-600">{vocab.exampleVi}</p>
+            {vocab.exampleEn && <p>{vocab.exampleEn}</p>}
+            {vocab.exampleVi && <p className="text-sm text-slate-600">{vocab.exampleVi}</p>}
           </div>
         ) : (
           <div className="mt-8"><Btn onClick={() => setFlipped(true)}>Hiện đáp án</Btn></div>

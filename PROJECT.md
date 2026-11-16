@@ -18,6 +18,9 @@
 | Phát âm bằng Web Speech API | Miễn phí; chất lượng tùy thiết bị |
 | Chấm luyện viết bằng quy tắc (độ dài + cụm từ) | Chưa dùng AI API trả phí; chỉ là gợi ý, không chấm ngữ pháp |
 | Bài đạt khi ≥ 60% bài tập | Ngưỡng tạm; có thể chỉnh `PASS_RATIO` |
+| Nhập từ từ file: đọc file trên trình duyệt (pdfjs-dist, mammoth, read-excel-file) | Miễn phí, file không rời máy |
+| Tra từ bằng dictionaryapi.dev + MyMemory (chỉ gửi từ đơn lẻ, có thể tắt) | Miễn phí, không khóa API; chưa dùng AI trả phí |
+| Người học duyệt/sửa từng từ trước khi lưu | Nghĩa tự dịch hay sai thuật ngữ chuyên ngành |
 | Nội dung tự soạn | Tránh bản quyền Forum Flash Study |
 
 ## Bản đồ dự án
@@ -39,7 +42,11 @@ src/
     store.tsx              Trạng thái toàn ứng dụng (React context)
     useStudyTimer.ts       Đo thời gian học thực tế
     speech.ts              Phát âm
-  pages/                   Dashboard, Programs, LessonPage, Review, ExercisePage, History
+    fileText.ts            Đọc PDF/DOCX/XLSX/CSV/TXT thành chữ
+    vocabExtract.ts        Trích từ ứng viên, nhận bảng từ vựng
+    dictionary.ts          Tra phiên âm, từ loại, nghĩa (dịch vụ miễn phí)
+    stopwords.ts           Danh sách từ bỏ qua
+  pages/                   Dashboard, Programs, LessonPage, Review, ExercisePage, History, ImportPage
   test/                    Kiểm thử (SRS, chấm bài, nội dung, luồng giao diện)
 public/                    Biểu tượng PWA
 ```
@@ -60,7 +67,11 @@ public/                    Biểu tượng PWA
 - Luyện viết chưa kiểm tra ngữ pháp.
 - Dữ liệu chỉ nằm trên một trình duyệt.
 - Phát âm phụ thuộc giọng đọc của thiết bị.
-- Chưa có giao diện thêm/sửa từ vựng riêng.
+- Từ nhập từ file chưa sửa được sau khi lưu (chỉ xóa rồi nhập lại).
+- Không có OCR cho PDF scan; không đọc .doc/.xls cũ.
+- Không trích cụm từ (chỉ từ đơn); không lemmatize đầy đủ (chỉ gộp số nhiều đơn giản).
+- Phụ thuộc 2 dịch vụ miễn phí bên thứ ba; có thể đổi điều khoản/giới hạn.
+- Đọc PDF cần trình duyệt đời mới; chưa thử trên iPhone/Safari thật.
 
 ## Việc tiếp theo (đề xuất theo thứ tự)
 1. Chủ dự án dùng thử 1 tuần, ghi lại điểm khó dùng.
@@ -73,3 +84,4 @@ public/                    Biểu tượng PWA
 ## Nhật ký
 - 2026-11-16: Tạo bản demo đầu tiên. 17 kiểm thử đạt; đã kiểm tra trên trình duyệt (di động): offline, service worker, ghi thời lượng.
 - 2026-11-16: Thêm workflow triển khai GitHub Pages.
+- 2026-11-16: Thêm tính năng nhập từ từ PDF/Word/Excel/CSV/TXT. 29 kiểm thử đạt; đã thử file thật trên Chromium.
