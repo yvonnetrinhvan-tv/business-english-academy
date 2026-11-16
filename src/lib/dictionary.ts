@@ -2,7 +2,7 @@
  * Tra phiên âm, từ loại và nghĩa tiếng Việt bằng dịch vụ miễn phí, không cần khóa:
  * - dictionaryapi.dev: phiên âm + từ loại
  * - MyMemory: gợi ý nghĩa tiếng Việt (có thể sai ngữ cảnh chuyên ngành, người học nên kiểm tra)
- * Chỉ gửi TỪ ĐƠN LẺ, không gửi nội dung tài liệu.
+ * Chỉ gửi từng từ hoặc cụm từ, không gửi nội dung tài liệu.
  */
 export interface Lookup {
   ipa: string
@@ -35,8 +35,10 @@ interface DictEntry { phonetic?: string; phonetics?: { text?: string }[]; meanin
 
 export async function lookupWord(word: string, f: Fetch = fetch): Promise<Lookup> {
   const w = encodeURIComponent(word)
+  const isPhrase = /\s/.test(word.trim())
   const [dict, tr] = await Promise.all([
-    getJson(`https://api.dictionaryapi.dev/api/v2/entries/en/${w}`, f),
+    // dictionaryapi.dev không có cụm từ: bỏ qua để đỡ gọi thừa
+    isPhrase ? Promise.resolve(null) : getJson(`https://api.dictionaryapi.dev/api/v2/entries/en/${w}`, f),
     getJson(`https://api.mymemory.translated.net/get?q=${w}&langpair=en|vi`, f),
   ])
 
@@ -55,6 +57,7 @@ export async function lookupWord(word: string, f: Fetch = fetch): Promise<Lookup
   if (text && !t?.quotaFinished && text.toLowerCase() !== word.toLowerCase() && !/MYMEMORY WARNING/i.test(text)) {
     meaningVi = text
   }
+  if (isPhrase) pos = 'phr.'
   return { ipa, pos, meaningVi }
 }
 

@@ -5,11 +5,13 @@ import { useStore } from '../lib/store'
 import { ACCEPT, extractFile, FileError } from '../lib/fileText'
 import { extractCandidates, makeId, parseVocabTable } from '../lib/vocabExtract'
 import { lookupWord, mapPool } from '../lib/dictionary'
+import { glossaryLookup } from '../data/glossary'
 import type { VocabItem } from '../types'
 
 interface Row extends VocabItem {
   selected: boolean
   count?: number
+  kind?: 'word' | 'phrase'
 }
 
 export default function ImportPage() {
@@ -22,13 +24,20 @@ export default function ImportPage() {
   const [mode, setMode] = useState<'table' | 'text' | null>(null)
   const [added, setAdded] = useState(0)
   const [online, setOnline] = useState(true)
+  const [show, setShow] = useState<'all' | 'phrase' | 'word'>('all')
 
   const patch = (i: number, p: Partial<Row>) => setRows((rs) => rs.map((r, k) => (k === i ? { ...r, ...p } : r)))
 
   const lookup = async (list: Row[]) => {
     setBusy('Đang tra nghĩa và phiên âm…')
     setProgress([0, list.length])
-    const res = await mapPool(list, 4, (r) => lookupWord(r.term), (d) => setProgress([d, list.length]))
+    const res = await mapPool(list, 4, async (r) => {
+      const g = glossaryLookup(r.term)
+      // Cụm đã có trong bảng thuật ngữ: không cần gọi mạng
+      if (g && /\s/.test(r.term)) return { ipa: '', pos: 'phr.', meaningVi: g }
+      const l = await lookupWord(r.term)
+      return g ? { ...l, meaningVi: g } : l
+    }, (d) => setProgress([d, list.length]))
     const byTerm = new Map(list.map((r, i) => [r.term, res[i]]))
     setRows((rs) => rs.map((r) => {
       const l = byTerm.get(r.term)
@@ -59,10 +68,11 @@ export default function ImportPage() {
       const cands = extractCandidates(out.text, { known })
       if (!cands.length) throw new FileError('Không tìm thấy từ mới phù hợp trong file này.')
       const list: Row[] = cands.map((c) => ({
-        id: makeId(c.term), term: c.term, ipa: '', pos: '', meaningVi: '', exampleEn: c.exampleEn, exampleVi: '',
-        source: file.name, selected: true, count: c.count,
+        id: makeId(c.term), term: c.term, ipa: '', meaningVi: '', exampleEn: c.exampleEn, exampleVi: '',
+        source: file.name, selected: true, count: c.count, kind: c.kind, pos: c.kind === 'phrase' ? 'phr.' : '',
       }))
       setRows(list)
+      setShow('all')
       setMode('text')
       if (online) await lookup(list)
       else setBusy(null)
@@ -72,11 +82,12 @@ export default function ImportPage() {
     }
   }
 
+  const nPhrase = rows.filter((r) => r.kind === 'phrase').length
   const ready = rows.filter((r) => r.selected && r.meaningVi.trim())
   const missing = rows.filter((r) => r.selected && !r.meaningVi.trim()).length
 
   const save = () => {
-    const items: VocabItem[] = ready.map(({ selected: _s, count: _c, ...v }) => ({ ...v, term: v.term.trim(), meaningVi: v.meaningVi.trim() }))
+    const items: VocabItem[] = ready.map(({ selected: _s, count: _c, kind: _k, ...v }) => ({ ...v, term: v.term.trim(), meaningVi: v.meaningVi.trim() }))
     addCustomVocab(items)
     setAdded(items.length)
     setRows([]); setMode(null)
@@ -94,7 +105,7 @@ export default function ImportPage() {
         <label className="mt-3 flex items-start gap-2 text-sm">
           <input type="checkbox" checked={online} onChange={(e) => setOnline(e.target.checked)} className="mt-1" />
           <span>Tự tra nghĩa tiếng Việt và phiên âm trên mạng (miễn phí).
-            <span className="block text-xs text-slate-500">File được đọc ngay trên máy bạn, không tải lên đâu cả. Chỉ từng từ đơn lẻ được gửi tới dictionaryapi.dev và MyMemory. Tắt nếu tài liệu bảo mật.</span></span>
+            <span className="block text-xs text-slate-500">File được đọc ngay trên máy bạn, không tải lên đâu cả. Chỉ từng từ hoặc cụm từ (không phải cả tài liệu) được gửi tới dictionaryapi.dev và MyMemory. Thuật ngữ có trong bảng nội bộ thì không gửi. Tắt nếu tài liệu bảo mật.</span></span>
         </label>
         <p className="mt-3 text-xs text-slate-500">
           Mẹo: file Excel/CSV có cột 1 là từ tiếng Anh, cột 2 là nghĩa (có thể thêm cột ví dụ) sẽ được nhập thẳng, không cần tra.
@@ -118,7 +129,7 @@ export default function ImportPage() {
         <>
           <Card className="mb-3">
             <p className="text-sm">
-              <b>{fileName}</b>: {rows.length} từ {mode === 'text' ? 'gợi ý (sắp theo tần suất)' : 'từ bảng'}.
+              <b>{fileName}</b>: {rows.length} mục {mode === 'text' ? `gợi ý (${nPhrase} cụm từ, ${rows.length - nPhrase} từ đơn, sắp theo tần suất)` : 'từ bảng'}.
               Đã chọn <b>{rows.filter((r) => r.selected).length}</b>
               {missing > 0 && <>, <span className="text-rose-700">{missing} từ thiếu nghĩa (sẽ bị bỏ qua, hãy điền nghĩa)</span></>}.
             </p>
@@ -130,16 +141,28 @@ export default function ImportPage() {
             </div>
           </Card>
 
+          {mode === 'text' && (
+            <div className="mb-3 flex items-center gap-2 text-sm">
+              <label htmlFor="show">Hiển thị</label>
+              <select id="show" value={show} onChange={(e) => setShow(e.target.value as typeof show)} className="rounded border border-slate-300 px-2 py-1">
+                <option value="all">Tất cả</option>
+                <option value="phrase">Chỉ cụm từ</option>
+                <option value="word">Chỉ từ đơn</option>
+              </select>
+            </div>
+          )}
+
           <ul className="grid gap-2">
-            {rows.map((r, i) => (
+            {rows.map((r, i) => (show === 'all' || r.kind === show) && (
               <li key={r.id}>
                 <Card className={r.selected ? '' : 'opacity-50'}>
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
                     <input type="checkbox" aria-label={`Chọn ${r.term}`} checked={r.selected} onChange={(e) => patch(i, { selected: e.target.checked })} />
-                    <span className="font-semibold">{r.term}</span>
+                    <span className="min-w-0 break-words font-semibold">{r.term}</span>
+                    {r.kind === 'phrase' && <span className="rounded bg-amber-100 px-1.5 text-xs text-amber-900">cụm</span>}
                     {r.count && r.count > 1 ? <span className="text-xs text-slate-500">×{r.count}</span> : null}
-                    <input aria-label={`Phiên âm ${r.term}`} value={r.ipa} onChange={(e) => patch(i, { ipa: e.target.value })} placeholder="phiên âm" className="w-28 rounded border border-slate-200 px-2 py-1 text-sm" />
-                    <input aria-label={`Từ loại ${r.term}`} value={r.pos} onChange={(e) => patch(i, { pos: e.target.value })} placeholder="loại" className="w-14 rounded border border-slate-200 px-2 py-1 text-sm" />
+                    <input aria-label={`Phiên âm ${r.term}`} value={r.ipa} onChange={(e) => patch(i, { ipa: e.target.value })} placeholder="phiên âm" className="min-w-0 flex-1 basis-24 rounded border border-slate-200 px-2 py-1 text-sm" />
+                    <input aria-label={`Từ loại ${r.term}`} value={r.pos} onChange={(e) => patch(i, { pos: e.target.value })} placeholder="loại" className="w-16 shrink-0 rounded border border-slate-200 px-2 py-1 text-sm" />
                   </div>
                   <input aria-label={`Nghĩa ${r.term}`} value={r.meaningVi} onChange={(e) => patch(i, { meaningVi: e.target.value })}
                     placeholder="Nghĩa tiếng Việt" className={`mt-2 w-full rounded border px-2 py-1 text-sm ${r.selected && !r.meaningVi.trim() ? 'border-rose-400' : 'border-slate-200'}`} />
