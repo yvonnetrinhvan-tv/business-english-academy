@@ -65,10 +65,11 @@ public/                    Biểu tượng PWA
 ## Việc tiếp theo (đề xuất theo thứ tự)
 1. Chủ dự án dùng thử 1 tuần, ghi lại điểm khó dùng.
 2. Soạn thêm 8 bài (4 Office, 4 Finance) theo mẫu.
-3. Triển khai HTTPS miễn phí (GitHub Pages hoặc Cloudflare Pages) để cài lên điện thoại.
+3. ~~Triển khai HTTPS miễn phí~~ GitHub Pages qua GitHub Actions (đã thêm workflow; cần bật Source = GitHub Actions một lần).
 4. Nối Supabase để đồng bộ nhiều thiết bị.
 5. Thêm xuất/nhập tiến độ ra file JSON (sao lưu).
 6. Cân nhắc AI chấm viết khi có ngân sách.
 
 ## Nhật ký
 - 2026-11-16: Tạo bản demo đầu tiên. 17 kiểm thử đạt; đã kiểm tra trên trình duyệt (di động): offline, service worker, ghi thời lượng.
+- 2026-11-16: Thêm workflow triển khai GitHub Pages.

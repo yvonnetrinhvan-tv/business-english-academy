@@ -36,7 +36,9 @@ Mở địa chỉ hiện ra (thường là http://localhost:5173).
 ## Cài lên điện thoại
 
 Mở bản đã triển khai bằng Chrome (Android) hoặc Safari (iPhone) → "Thêm vào màn hình chính".
-PWA cần địa chỉ HTTPS. Có thể triển khai miễn phí bằng GitHub Pages, Cloudflare Pages hoặc Netlify (thư mục `dist/`).
+PWA cần địa chỉ HTTPS. Dự án có sẵn workflow `.github/workflows/deploy.yml`: mỗi lần gộp vào `main`, GitHub chạy kiểm thử, build và đưa lên GitHub Pages.
+Địa chỉ: `https://yvonnetrinhvan-tv.github.io/business-english-academy/`
+Lần đầu: vào **Settings → Pages → Source** chọn **GitHub Actions**.
 
 ## Dữ liệu và quyền riêng tư
 
