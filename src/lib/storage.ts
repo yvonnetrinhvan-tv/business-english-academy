@@ -13,8 +13,10 @@ export interface ProgressRepository {
 
 export const STORAGE_KEY = 'bpe-academy:progress:v1'
 
+export const EPOCH = '1970-01-01T00:00:00.000Z'
+
 export function emptyState(): ProgressState {
-  return { version: 1, cards: {}, sessions: [], completedLessons: [], dailyGoalMinutes: 20, writings: {}, customVocab: [] }
+  return { version: 1, cards: {}, sessions: [], completedLessons: [], dailyGoalMinutes: 20, writings: {}, customVocab: [], deletedVocab: [], updatedAt: EPOCH }
 }
 
 export class LocalStorageRepository implements ProgressRepository {
