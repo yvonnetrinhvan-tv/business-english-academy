@@ -3,6 +3,7 @@ import { Btn, Card, PageTitle } from '../components/ui'
 import { useStore } from '../lib/store'
 import { averageScore, formatDuration, totalSeconds } from '../lib/stats'
 import { getLesson } from '../data/lessons'
+import SyncPanel from '../components/SyncPanel'
 
 const kindLabel = { lesson: 'Đọc bài', flashcards: 'Flashcards', exercises: 'Bài tập' } as const
 
@@ -15,6 +16,8 @@ export default function History() {
   return (
     <>
       <PageTitle sub="Điểm số, thời lượng thực tế và lịch sử các buổi học.">Lịch sử học</PageTitle>
+
+      <SyncPanel />
 
       <div className="mb-4 grid grid-cols-3 gap-3 text-center">
         <Card><p className="text-xl font-bold">{state.sessions.length}</p><p className="text-xs text-slate-600">Buổi học</p></Card>

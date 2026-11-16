@@ -85,4 +85,6 @@ export interface ProgressState {
   dailyGoalMinutes: number
   writings: Record<string, string> // exerciseId -> bài viết mới nhất
   customVocab: VocabItem[] // từ nhập từ tài liệu của người học
+  deletedVocab: string[] // id từ đã xóa (để đồng bộ không làm sống lại)
+  updatedAt: string // lần sửa gần nhất (ISO), dùng khi gộp dữ liệu giữa thiết bị
 }

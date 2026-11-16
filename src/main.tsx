@@ -5,12 +5,15 @@ import { registerSW } from 'virtual:pwa-register'
 import './index.css'
 import App from './App'
 import { StoreProvider } from './lib/store'
+import { createSyncController } from './lib/supabaseRemote'
+
+const sync = createSyncController()
 
 registerSW({ immediate: true })
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <StoreProvider>
+    <StoreProvider sync={sync}>
       <HashRouter>
         <App />
       </HashRouter>
