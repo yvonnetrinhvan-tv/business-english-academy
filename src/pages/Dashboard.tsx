@@ -1,14 +1,14 @@
 import { Link } from 'react-router-dom'
 import { Card, PageTitle, ProgressBar, Btn } from '../components/ui'
 import { useStore } from '../lib/store'
-import { lessons, allVocab } from '../data/lessons'
+import { lessons } from '../data/lessons'
 import { isDue, mastery } from '../lib/srs'
 import { formatDuration, last7Days, secondsOnDay, streak } from '../lib/stats'
 
 const dow = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']
 
 export default function Dashboard() {
-  const { state } = useStore()
+  const { state, vocab: allVocab } = useStore()
   const now = new Date()
   const todaySec = secondsOnDay(state.sessions, now)
   const goalSec = state.dailyGoalMinutes * 60

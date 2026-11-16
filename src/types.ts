@@ -15,6 +15,8 @@ export interface VocabItem {
   meaningVi: string
   exampleEn: string
   exampleVi: string
+  /** Tên file nguồn nếu từ được nhập từ tài liệu */
+  source?: string
 }
 
 export interface BilingualText {
@@ -82,4 +84,5 @@ export interface ProgressState {
   completedLessons: string[]
   dailyGoalMinutes: number
   writings: Record<string, string> // exerciseId -> bài viết mới nhất
+  customVocab: VocabItem[] // từ nhập từ tài liệu của người học
 }

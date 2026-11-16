@@ -5,11 +5,13 @@ import LessonPage from './pages/LessonPage'
 import Review from './pages/Review'
 import ExercisePage from './pages/ExercisePage'
 import History from './pages/History'
+import ImportPage from './pages/ImportPage'
 
 const nav = [
   { to: '/', label: 'Tổng quan', icon: '🏠', end: true },
   { to: '/chuong-trinh', label: 'Chương trình', icon: '📚' },
   { to: '/on-tap', label: 'Ôn từ', icon: '🃏' },
+  { to: '/nhap-tu', label: 'Nhập từ', icon: '📥' },
   { to: '/lich-su', label: 'Lịch sử', icon: '📈' },
 ]
 
@@ -35,6 +37,7 @@ export default function App() {
           <Route path="/bai/:id" element={<LessonPage />} />
           <Route path="/bai/:id/bai-tap" element={<ExercisePage />} />
           <Route path="/on-tap" element={<Review />} />
+          <Route path="/nhap-tu" element={<ImportPage />} />
           <Route path="/lich-su" element={<History />} />
           <Route path="*" element={<Dashboard />} />
         </Routes>
