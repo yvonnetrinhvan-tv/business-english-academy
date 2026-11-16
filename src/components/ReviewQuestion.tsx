@@ -177,6 +177,7 @@ export default function ReviewQuestion({ q, vocab, card, relearn, leech, onResul
         <div className="text-center">
           <p className="text-sm text-slate-500">Điền từ còn thiếu vào câu</p>
           <p className="mt-2 text-xl font-medium leading-relaxed">{q.sentence}</p>
+          {vocab.exampleVi && <p className="mt-1 text-sm italic text-slate-500">{vocab.exampleVi}</p>}
           <p className="mt-2 text-sm text-slate-500">Nghĩa của từ: <b className="text-brand-700">{vocab.meaningVi}</b></p>
         </div>
       ) : q.mode === 'typing' ? (
@@ -184,6 +185,7 @@ export default function ReviewQuestion({ q, vocab, card, relearn, leech, onResul
           <p className="text-sm text-slate-500">Gõ từ tiếng Anh có nghĩa:</p>
           <p className="mt-1 text-2xl font-bold text-brand-700">{vocab.meaningVi}</p>
           {vocab.pos && <p className="text-sm text-slate-500">({vocab.pos})</p>}
+          {vocab.exampleVi && <p className="mt-2 text-sm italic text-slate-500">Ví dụ: {vocab.exampleVi}</p>}
         </div>
       ) : (
         <div className="text-center">

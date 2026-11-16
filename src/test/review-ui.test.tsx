@@ -134,6 +134,24 @@ describe('Ôn tập: phiên ôn tính lịch', () => {
   })
 })
 
+describe('Ôn tập: gõ tiếng Anh theo nghĩa tiếng Việt', () => {
+  it('từ mới: hiện nghĩa và câu ví dụ tiếng Việt, không có đáp án để chọn, gõ đúng được chấm', async () => {
+    const u = user()
+    const repo = await setup()
+    await setNew(u, '1')
+    await u.selectOptions(screen.getByLabelText('Kiểu ôn'), 'type')
+    await u.click(screen.getByRole('button', { name: /Bắt đầu ôn/ }))
+    await u.click(await screen.findByRole('button', { name: 'Đã xem, kiểm tra tôi' }))
+    await screen.findByLabelText('Câu trả lời')
+    expect(screen.queryByRole('radiogroup')).not.toBeInTheDocument()
+    expect(screen.getByText(/Tôi đã đính kèm hợp đồng đã ký/)).toBeInTheDocument() // câu ví dụ tiếng Việt
+    await u.type(screen.getByLabelText('Câu trả lời'), 'attach')
+    await u.click(screen.getByRole('button', { name: 'Kiểm tra' }))
+    expect(screen.getByText('Đúng.')).toBeInTheDocument()
+    await waitFor(async () => expect((await lone(repo))[0]).toMatchObject({ reps: 1 }))
+  })
+})
+
 describe('Ôn tập: lật thẻ qua lại', () => {
   it('lật sang nghĩa rồi lật lại, vẫn chấm được', async () => {
     const u = user()

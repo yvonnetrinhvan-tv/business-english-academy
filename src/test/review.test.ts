@@ -22,6 +22,20 @@ const card = (id: string, o: Partial<CardState> = {}): CardState => ({ ...newCar
 const CTX = { canSpeak: true, poolSize: POOL.length }
 
 describe('cloze', () => {
+  it('kiểu "type": chỉ gõ (gõ từ hoặc điền câu), không trắc nghiệm, kể cả từ mới và từ học lại', () => {
+    const seen = new Set<Mode>()
+    for (let i = 0; i < 40; i++) {
+      for (const c of [undefined, card('a', { reps: 0 }), card('a', { reps: 5 })]) {
+        seen.add(pickMode(c, POOL[0], CTX, { forced: 'type', relearn: i % 2 === 0, rand: () => i / 40 }))
+      }
+    }
+    expect([...seen].sort()).toEqual(['cloze', 'typing'])
+    // từ không có câu ví dụ: chỉ gõ từ
+    expect(pickMode(undefined, POOL[5], CTX, { forced: 'type', rand: () => 0.9 })).toBe('typing')
+    // không lặp liền hai lần cùng kiểu khi có hai kiểu
+    for (let i = 0; i < 20; i++) expect(pickMode(undefined, POOL[0], CTX, { forced: 'type', last: 'typing', rand: () => i / 20 })).toBe('cloze')
+  })
+
   it('khoét từ, kể cả biến thể và cụm', () => {
     expect(clozeOf(POOL[0])).toEqual({ sentence: 'I have _____ the signed contract.', answer: 'attached' })
     expect(clozeOf(POOL[3])?.answer).toBe('following up')
