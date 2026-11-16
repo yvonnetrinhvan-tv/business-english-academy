@@ -3,6 +3,7 @@ import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import App from '../App'
+import { allVocab } from '../data/lessons'
 import { StoreProvider } from '../lib/store'
 import { emptyState, LocalStorageRepository } from '../lib/storage'
 import type { CardState, ProgressState } from '../types'
@@ -29,7 +30,7 @@ describe('Ôn tập: màn hình chính', () => {
     await setup()
     expect(await screen.findByText('Đến hạn ôn')).toBeInTheDocument()
     expect(screen.getByRole('img', { name: /dự báo|Biểu đồ số thẻ/i })).toBeInTheDocument()
-    expect(screen.getByText(/Mức ghi nhớ \(20 từ\)/)).toBeInTheDocument()
+    expect(screen.getByText(new RegExp(`Mức ghi nhớ \\(${allVocab.length} từ\\)`))).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Bắt đầu ôn \(10 thẻ\)/ })).toBeInTheDocument()
   })
 })
@@ -130,6 +131,25 @@ describe('Ôn tập: phiên ôn tính lịch', () => {
       expect(c.intervalDays).toBeGreaterThanOrEqual(2.8) // 3 ngày ± 5% xê dịch
       expect(c.intervalDays).toBeLessThanOrEqual(3.2)
     })
+  })
+})
+
+describe('Ôn tập: lật thẻ qua lại', () => {
+  it('lật sang nghĩa rồi lật lại, vẫn chấm được', async () => {
+    const u = user()
+    await setup()
+    await setNew(u, '1')
+    await u.selectOptions(screen.getByLabelText('Kiểu ôn'), 'flashcard')
+    await u.click(screen.getByRole('button', { name: /Bắt đầu ôn/ }))
+    await u.click(await screen.findByRole('button', { name: 'Đã xem, kiểm tra tôi' }))
+    expect(screen.queryByRole('button', { name: /^Dễ/ })).not.toBeInTheDocument()
+    await u.click(await screen.findByRole('button', { name: 'Lật thẻ xem nghĩa' }))
+    expect(screen.getByRole('button', { name: /^Dễ/ })).toBeInTheDocument()
+    await u.click(screen.getByRole('button', { name: 'Lật thẻ về mặt tiếng Anh' }))
+    expect(screen.getByRole('button', { name: 'Lật thẻ xem nghĩa' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^Dễ/ })).toBeInTheDocument()
+    await u.click(screen.getByRole('button', { name: 'Hiện đáp án' }))
+    expect(screen.getByRole('button', { name: 'Lật thẻ về mặt tiếng Anh' })).toBeInTheDocument()
   })
 })
 

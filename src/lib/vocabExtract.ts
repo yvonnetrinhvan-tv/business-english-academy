@@ -103,6 +103,9 @@ export function extractCandidates(text: string, opts: ExtractOptions = {}): Cand
   return all
 }
 
+/** Giới từ được phép nối hai từ nội dung thành cụm ("segregation of duties"). Bỏ "to" vì dễ nhầm với to + động từ. */
+const LINK_PREPS = new Set(['of', 'for', 'in', 'on', 'with', 'by', 'from', 'against', 'between'])
+
 const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
 /**
@@ -111,7 +114,7 @@ const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
  * lặp ít nhất minCount lần, không phải tên riêng. Cụm con bị bỏ nếu luôn nằm trong cụm dài hơn.
  */
 function extractPhrases(text: string, known: Set<string>, minCount: number, max: number): Candidate[] {
-  type Tok = { w: string; cap: boolean; sentStart: boolean; ok: boolean; end: number; start: number }
+  type Tok = { w: string; cap: boolean; sentStart: boolean; ok: boolean; end: number; start: number; prep: boolean }
   const toks: Tok[] = []
   for (const m of text.matchAll(WORD_RE)) {
     const raw = m[0].replace(/[’]/g, "'")
@@ -125,6 +128,7 @@ function extractPhrases(text: string, known: Set<string>, minCount: number, max:
       ok: raw.length >= 3 && !(raw === raw.toUpperCase() && raw.length > 1) && !STOPWORDS.has(w) && !w.includes("'"),
       start: i,
       end: i + raw.length,
+      prep: LINK_PREPS.has(w),
     })
   }
 
@@ -154,6 +158,20 @@ function extractPhrases(text: string, known: Set<string>, minCount: number, max:
     run.push(t)
   })
   flush()
+
+  // Cụm có giới từ: từ nội dung + giới từ + từ nội dung, liền nhau ("segregation of duties")
+  const tight = (a: Tok, b: Tok) => /^ +$/.test(text.slice(a.end, b.start))
+  for (let i = 0; i + 2 < toks.length; i++) {
+    const [a, p, b] = [toks[i], toks[i + 1], toks[i + 2]]
+    if (!a.ok || !p.prep || !b.ok || !tight(a, p) || !tight(p, b)) continue
+    const term = `${a.w} ${p.w} ${b.w}`
+    if (known.has(term)) continue
+    const proper = a.cap && b.cap && !(a.sentStart && !b.cap)
+    const e = map.get(term) ?? { count: 0, allProper: true }
+    e.count++
+    if (!proper) e.allProper = false
+    map.set(term, e)
+  }
 
   const kept = [...map].filter(([, e]) => e.count >= minCount && !e.allProper)
   // Bỏ cụm con có cùng số lần với cụm dài hơn chứa nó

@@ -8,7 +8,7 @@ export default function Programs() {
   const { state } = useStore()
   return (
     <>
-      <PageTitle sub="30 bài, chia đều 2 chương trình. Bài có nhãn “Sẵn sàng” đã có nội dung đầy đủ.">Chương trình học</PageTitle>
+      <PageTitle sub="30 bài, chia đều 2 chương trình (10 bài đã có nội dung). Bài có nhãn “Sẵn sàng” đã có nội dung đầy đủ.">Chương trình học</PageTitle>
       {programs.map((p) => {
         const list = lessonsByProgram(p.id)
         const done = list.filter((l) => state.completedLessons.includes(l.id)).length

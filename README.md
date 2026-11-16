@@ -74,7 +74,7 @@ Vào tab **Nhập từ** → chọn file.
 Lưu ý:
 - File được đọc ngay trên máy, không tải lên máy chủ.
 - Nếu bật "Tự tra", từng **từ hoặc cụm từ** (không phải cả tài liệu) được gửi tới dictionaryapi.dev (phiên âm, từ loại) và MyMemory (nghĩa tiếng Việt). Tắt tùy chọn này với tài liệu bảo mật.
-- Cụm từ được trích khi lặp lại ít nhất 2 lần (2–3 từ liền nhau, không chứa từ phổ biến như *of*, *and*). Cụm có giới từ như "segregation of duties" chưa được trích.
+- Cụm từ được trích khi lặp lại ít nhất 2 lần (2–3 từ liền nhau, không chứa từ phổ biến như *of*, *and*). Cụm có giới từ nối (of, for, in, on, with, by, from, against, between) dạng "segregation of duties" cũng được trích (từ + giới từ + từ, lặp ≥ 2 lần).
 - Thuật ngữ kế toán/tài chính phổ biến (khoảng 60 mục) lấy nghĩa từ bảng tự soạn `src/data/glossary.ts`, chính xác hơn dịch tự động. Bạn có thể thêm dòng mới vào file này.
 - Nghĩa tự tra là **gợi ý**, hay sai với thuật ngữ kế toán/tài chính (ví dụ "variance" có thể ra nghĩa thống kê). Luôn đọc lại và sửa trước khi lưu.
 - MyMemory giới hạn khoảng 5.000 ký tự/ngày cho mỗi người dùng ẩn danh.

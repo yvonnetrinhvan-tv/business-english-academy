@@ -45,7 +45,7 @@ Internal controls matter. Internal controls reduce risk. Every journal entry nee
   })
   it('bỏ cụm chỉ xuất hiện 1 lần và cụm có từ phổ biến', () => {
     expect(phrases).not.toContain('journal entry')
-    expect(phrases.some((p) => p.split(' ').includes('the') || p.split(' ').includes('for'))).toBe(false)
+    expect(phrases.some((p) => p.split(' ').includes('the') || /^(of|for|in|on|with|by) | (and|the)( |$)/.test(p))).toBe(false)
   })
   it('không lặp từ đơn luôn nằm trong cụm', () => {
     const words = c.filter((x) => x.kind === 'word').map((x) => x.term)
@@ -64,6 +64,31 @@ Internal controls matter. Internal controls reduce risk. Every journal entry nee
   it('bỏ cụm là tên riêng', () => {
     const t = 'We met with Blue Harbor yesterday. Blue Harbor agreed. Later Blue Harbor signed.'
     expect(extractCandidates(t).map((x) => x.term)).not.toContain('blue harbor')
+  })
+})
+
+describe('cụm có giới từ', () => {
+  const T = `Segregation of duties prevents fraud. We test segregation of duties each quarter.
+Staff must follow the delegation of authority. The delegation of authority sets limits.
+Reconciliation with bank statements is monthly. Review of reconciliations happens once.
+Payment for invoices needs approval. We wait for approval.`
+  const phrases = extractCandidates(T).filter((x) => x.kind === 'phrase').map((x) => x.term)
+  it('lấy cụm từ + giới từ + từ lặp ≥ 2 lần', () => {
+    expect(phrases).toContain('segregation of duties')
+    expect(phrases).toContain('delegation of authority')
+  })
+  it('bỏ cụm chỉ gặp 1 lần', () => {
+    expect(phrases).not.toContain('reconciliation with bank')
+    expect(phrases).not.toContain('payment for invoices')
+  })
+  it('không lặp từ đơn nằm trong cụm, có câu ví dụ', () => {
+    const c = extractCandidates(T)
+    expect(c.filter((x) => x.kind === 'word').map((x) => x.term)).not.toContain('duties')
+    expect(c.find((x) => x.term === 'segregation of duties')?.exampleEn).toMatch(/segregation of duties/i)
+  })
+  it('bỏ cụm là tên riêng', () => {
+    const t = 'We met Bank of America today. Bank of America agreed. Bank of America signed.'
+    expect(extractCandidates(t).map((x) => x.term)).not.toContain('bank of america')
   })
 })
 
