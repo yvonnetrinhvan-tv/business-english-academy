@@ -41,6 +41,7 @@ export default function ReviewQuestion({ q, vocab, card, relearn, leech, onResul
   const [text, setText] = useState('')
   const [hint, setHint] = useState(0)
   const [flipped, setFlipped] = useState(false)
+  const [seen, setSeen] = useState(false) // đã lật ít nhất một lần → được chấm
   const [result, setResult] = useState<{ correct: boolean; near: boolean } | null>(null)
   const started = useRef(Date.now())
   const nextRef = useRef<HTMLButtonElement>(null)
@@ -59,6 +60,11 @@ export default function ReviewQuestion({ q, vocab, card, relearn, leech, onResul
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (phase === 'feedback') return
+      if (q.mode === 'flashcard' && e.key === ' ' && !(e.target instanceof HTMLButtonElement)) {
+        e.preventDefault()
+        flip()
+        return
+      }
       const n = Number(e.key)
       if (q.options && n >= 1 && n <= q.options.length && picked === null) pickOption(n - 1)
     }
@@ -67,6 +73,8 @@ export default function ReviewQuestion({ q, vocab, card, relearn, leech, onResul
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, picked, q])
   useEffect(() => { if (phase === 'feedback') nextRef.current?.focus() }, [phase])
+
+  const flip = () => { setFlipped((f) => !f); setSeen(true) }
 
   const pickOption = (i: number) => {
     setPicked(i)
@@ -100,24 +108,35 @@ export default function ReviewQuestion({ q, vocab, card, relearn, leech, onResul
     const now = new Date()
     body = (
       <>
-        <div className="text-center">
-          <p className="text-3xl font-bold">{vocab.term}</p>
-          <p className="mt-1 text-slate-500">{[vocab.ipa, vocab.pos].filter(Boolean).join(' · ')}</p>
-          <div className="mt-2 flex justify-center gap-2"><SpeakButton text={vocab.term} label="Nghe từ" /></div>
+        <button type="button" onClick={flip} aria-label={flipped ? 'Lật thẻ về mặt tiếng Anh' : 'Lật thẻ xem nghĩa'}
+          className="block min-h-40 w-full rounded-xl border border-slate-200 bg-white p-4 text-center shadow-sm transition active:scale-[0.99]">
+          {flipped ? (
+            <span className="block text-left">
+              <span className="block text-center text-2xl font-bold text-brand-700">{vocab.meaningVi}</span>
+              <span className="mt-3 block"><VocabDetail v={vocab} /></span>
+            </span>
+          ) : (
+            <span className="block py-4">
+              <span className="block text-3xl font-bold">{vocab.term}</span>
+              <span className="mt-1 block text-slate-500">{[vocab.ipa, vocab.pos].filter(Boolean).join(' · ')}</span>
+              <span className="mt-3 block text-xs text-slate-400">Chạm để lật</span>
+            </span>
+          )}
+        </button>
+        <div className="mt-2 flex flex-wrap justify-center gap-2">
+          <SpeakButton text={vocab.term} label="Nghe từ" />
+          <Btn onClick={flip}>{flipped ? 'Lật lại mặt tiếng Anh' : 'Hiện đáp án'}</Btn>
         </div>
-        {flipped ? (
-          <>
-            <div className="mt-4"><VocabDetail v={vocab} /></div>
-            <div className="mt-4 grid grid-cols-4 gap-2">
-              {([['again', 'Quên', 'bg-rose-600'], ['hard', 'Khó', 'bg-amber-600'], ['good', 'Nhớ', 'bg-brand-700'], ['easy', 'Dễ', 'bg-sky-700']] as const).map(([g, label, cls]) => (
-                <button key={g} type="button" onClick={() => finish(g !== 'again', false, g)}
-                  className={`rounded-lg px-2 py-3 text-sm font-semibold text-white ${cls}`}>
-                  {label}<span className="block text-xs font-normal opacity-90">{previewInterval(card, g, now)}</span>
-                </button>
-              ))}
-            </div>
-          </>
-        ) : <div className="mt-6 text-center"><Btn onClick={() => setFlipped(true)}>Hiện đáp án</Btn></div>}
+        {seen && (
+          <div className="mt-4 grid grid-cols-4 gap-2">
+            {([['again', 'Quên', 'bg-rose-600'], ['hard', 'Khó', 'bg-amber-600'], ['good', 'Nhớ', 'bg-brand-700'], ['easy', 'Dễ', 'bg-sky-700']] as const).map(([g, label, cls]) => (
+              <button key={g} type="button" onClick={() => finish(g !== 'again', false, g)}
+                className={`rounded-lg px-2 py-3 text-sm font-semibold text-white ${cls}`}>
+                {label}<span className="block text-xs font-normal opacity-90">{previewInterval(card, g, now)}</span>
+              </button>
+            ))}
+          </div>
+        )}
       </>
     )
   } else if (q.mode === 'mcq-vi' || q.mode === 'mcq-en') {

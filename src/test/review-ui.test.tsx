@@ -134,6 +134,25 @@ describe('Ôn tập: phiên ôn tính lịch', () => {
   })
 })
 
+describe('Ôn tập: lật thẻ qua lại', () => {
+  it('lật sang nghĩa rồi lật lại, vẫn chấm được', async () => {
+    const u = user()
+    await setup()
+    await setNew(u, '1')
+    await u.selectOptions(screen.getByLabelText('Kiểu ôn'), 'flashcard')
+    await u.click(screen.getByRole('button', { name: /Bắt đầu ôn/ }))
+    await u.click(await screen.findByRole('button', { name: 'Đã xem, kiểm tra tôi' }))
+    expect(screen.queryByRole('button', { name: /^Dễ/ })).not.toBeInTheDocument()
+    await u.click(await screen.findByRole('button', { name: 'Lật thẻ xem nghĩa' }))
+    expect(screen.getByRole('button', { name: /^Dễ/ })).toBeInTheDocument()
+    await u.click(screen.getByRole('button', { name: 'Lật thẻ về mặt tiếng Anh' }))
+    expect(screen.getByRole('button', { name: 'Lật thẻ xem nghĩa' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^Dễ/ })).toBeInTheDocument()
+    await u.click(screen.getByRole('button', { name: 'Hiện đáp án' }))
+    expect(screen.getByRole('button', { name: 'Lật thẻ về mặt tiếng Anh' })).toBeInTheDocument()
+  })
+})
+
 describe('Ôn tập: luyện thêm', () => {
   const learned = (id: string, over: Partial<CardState> = {}): CardState => ({
     vocabId: id, ease: 2.5, intervalDays: 2, reps: 1, lapses: 1, due: '2099-01-01T00:00:00.000Z', lastReviewed: '2026-01-01T00:00:00.000Z', ...over,

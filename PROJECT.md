@@ -107,4 +107,5 @@ Khi thương mại hóa: bật xác nhận email + SMTP riêng, thêm "quên m�
 - 2026-11-16: Thêm trích cụm từ (2–3 từ) và bảng thuật ngữ tài chính tự soạn.
 - 2026-11-16: Thêm đồng bộ Supabase, gộp dữ liệu, sao lưu file. 63+ kiểm thử đạt; chưa thử với Supabase thật.
 - 2026-11-16: Ôn tập đa dạng 6 kiểu, hàng đợi học lại, luyện thêm, dự báo 7 ngày. 101 kiểm thử đạt; đã chạy đủ 6 kiểu trên Chromium.
+- 2026-11-16: Flashcard lật qua lại (chạm thẻ hoặc phím Space), chấm được sau lần lật đầu. 108 kiểm thử đạt.
 - 2026-11-16: Thêm 8 bài đầy đủ (office-02..05, finance-02..05), trích cụm có giới từ nối. 107 kiểm thử đạt. Sửa bài mẫu bv-w1: câu mẫu thiếu cụm nguyên nhân mà bộ chấm yêu cầu. Supabase thật: chưa làm (cần tài khoản của chủ dự án).
