@@ -15,6 +15,10 @@ export const MODE_LABEL: Record<Mode, string> = {
   listening: 'Nghe và gõ',
 }
 
+/** Cách chọn kiểu: tự động, một kiểu cố định, hoặc "type" = chỉ gõ tiếng Anh theo nghĩa tiếng Việt (không chọn đáp án). */
+export type Forced = Mode | 'auto' | 'type'
+export const TYPE_ONLY_LABEL = 'Gõ tiếng Anh theo nghĩa tiếng Việt (không chọn)'
+
 export interface ModeContext {
   canSpeak: boolean
   /** Tổng số từ có thể làm đáp án nhiễu */
@@ -56,7 +60,7 @@ const STAGES: Mode[][] = [
 ]
 
 export interface PickOptions {
-  forced?: Mode | 'auto'
+  forced?: Forced
   last?: Mode
   /** Đang học lại sau khi quên: chỉ dùng kiểu nhận ra cho dễ */
   relearn?: boolean
@@ -66,6 +70,12 @@ export interface PickOptions {
 export function pickMode(card: CardState | undefined, v: VocabItem, ctx: ModeContext, o: PickOptions = {}): Mode {
   const rand = o.rand ?? Math.random
   const avail = availableModes(v, ctx)
+  if (o.forced === 'type') {
+    // Chỉ kiểu gõ: gõ từ theo nghĩa, hoặc điền chỗ trống trong câu (kèm bản dịch tiếng Việt)
+    let opts = (['typing', 'cloze'] as Mode[]).filter((m) => avail.includes(m))
+    if (o.last && opts.length > 1) opts = opts.filter((m) => m !== o.last)
+    return opts[Math.floor(rand() * opts.length)] ?? 'typing'
+  }
   if (o.forced && o.forced !== 'auto') return avail.includes(o.forced) ? o.forced : 'flashcard'
   if (o.relearn || isLeech(card)) {
     const easy = (['mcq-vi', 'mcq-en'] as Mode[]).filter((m) => avail.includes(m))

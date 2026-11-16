@@ -16,6 +16,7 @@
 | Lưu `localStorage` qua interface `ProgressRepository` | Demo không cần máy chủ; đổi sang Supabase chỉ thay 1 lớp |
 | Lịch ôn SM-2 rút gọn (4 mức), xê dịch ±5%, trần 365 ngày | Đơn giản, đã được kiểm chứng, tự viết, có test |
 | Ôn tập 6 kiểu, chọn kiểu theo mức nhớ (nhận ra → nhớ ra); kết quả tự quy đổi sang Quên/Khó/Nhớ/Dễ | Nhớ ra hiệu quả hơn lật thẻ; không bắt người học tự chấm mọi lúc |
+| Thêm kiểu ôn "Gõ tiếng Anh theo nghĩa tiếng Việt" (chọn trong "Kiểu ôn"): mọi thẻ tự gõ đáp án, hiện nghĩa + câu ví dụ tiếng Việt, không trắc nghiệm | Người học muốn nhớ ra thay vì nhận ra; là kiểu mặc định theo yêu cầu của chủ dự án; "Tự động" (trắc nghiệm → gõ) vẫn chọn được |
 | Từ quên quay lại sau 4 thẻ, lượt học lại không ghi lịch | Củng cố ngay mà không kéo lệch khoảng ôn |
 | "Luyện thêm" không đổi lịch ôn | Ôn sớm ngoài lịch làm sai lệch khoảng cách ngắt quãng |
 | Phát âm bằng Web Speech API | Miễn phí; chất lượng tùy thiết bị |
@@ -109,3 +110,5 @@ Khi thương mại hóa: bật xác nhận email + SMTP riêng, thêm "quên m�
 - 2026-11-16: Ôn tập đa dạng 6 kiểu, hàng đợi học lại, luyện thêm, dự báo 7 ngày. 101 kiểm thử đạt; đã chạy đủ 6 kiểu trên Chromium.
 - 2026-11-16: Flashcard lật qua lại (chạm thẻ hoặc phím Space), chấm được sau lần lật đầu. 108 kiểm thử đạt.
 - 2026-11-16: Thêm 8 bài đầy đủ (office-02..05, finance-02..05), trích cụm có giới từ nối. 107 kiểm thử đạt. Sửa bài mẫu bv-w1: câu mẫu thiếu cụm nguyên nhân mà bộ chấm yêu cầu. Supabase thật: chưa làm (cần tài khoản của chủ dự án).
+- 2026-11-16: README: địa chỉ ứng dụng thành liên kết bấm được. Thêm kiểu ôn "Gõ tiếng Anh theo nghĩa tiếng Việt" (gõ từ + điền câu, kèm câu ví dụ tiếng Việt). 110 kiểm thử đạt.
+- 2026-11-16: Đổi kiểu ôn mặc định sang "Gõ tiếng Anh theo nghĩa tiếng Việt".

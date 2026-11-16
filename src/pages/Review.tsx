@@ -9,14 +9,14 @@ import { useStudyTimer } from '../lib/useStudyTimer'
 import { formatDuration } from '../lib/stats'
 import {
   afterAnswer, afterIntro, buildPractice, buildQuestion, buildSession, gradeFromOutcome, MODE_LABEL, pickMode,
-  type Mode, type Outcome, type PracticeScope, type QueueItem, type StepResult,
+  type Forced, type Mode, type Outcome, TYPE_ONLY_LABEL, type PracticeScope, type QueueItem, type StepResult,
 } from '../lib/review'
 import type { VocabItem } from '../types'
 
 const dow = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']
 const SEC_PER_CARD = 20
 
-interface RunConfig { items: QueueItem[]; practice: boolean; forced: Mode | 'auto' }
+interface RunConfig { items: QueueItem[]; practice: boolean; forced: Forced }
 interface Answer { vocabId: string; mode: Mode; correct: boolean; ms: number }
 interface Summary { answers: Answer[]; failedIds: string[]; seconds: number; practice: boolean }
 
@@ -36,7 +36,7 @@ function Home({ onStart }: { onStart: (c: RunConfig) => void }) {
   const { state, vocab } = useStore()
   const [limit, setLimit] = useState(20)
   const [newLimit, setNewLimit] = useState(10)
-  const [forced, setForced] = useState<Mode | 'auto'>('auto')
+  const [forced, setForced] = useState<Forced>('type')
   const [scope, setScope] = useState<PracticeScope>('weak')
   const now = new Date()
 
@@ -88,11 +88,12 @@ function Home({ onStart }: { onStart: (c: RunConfig) => void }) {
             <select aria-label="Từ mới mỗi phiên" value={newLimit} onChange={(e) => setNewLimit(Number(e.target.value))} className={`${sel} sm:mt-1 sm:w-full`}>
               {[0, 1, 5, 10, 20].map((n) => <option key={n} value={n}>{n}</option>)}</select></label>
           <label className="flex items-center justify-between gap-2 sm:block">Kiểu ôn
-            <select aria-label="Kiểu ôn" value={forced} onChange={(e) => setForced(e.target.value as Mode | 'auto')} className={`${sel} sm:mt-1 sm:w-full`}>
-              <option value="auto">Tự động (khuyên dùng)</option>
+            <select aria-label="Kiểu ôn" value={forced} onChange={(e) => setForced(e.target.value as Forced)} className={`${sel} sm:mt-1 sm:w-full`}>
+              <option value="type">{TYPE_ONLY_LABEL} (mặc định)</option>
+              <option value="auto">Tự động (trắc nghiệm → gõ)</option>
               {(Object.keys(MODE_LABEL) as Mode[]).filter((m) => m !== 'listening' || canSpeak()).map((m) => <option key={m} value={m}>{MODE_LABEL[m]}</option>)}</select></label>
         </div>
-        <p className="mt-2 text-xs text-slate-500">“Tự động”: từ mới làm trắc nghiệm, từ đã nhớ lâu chuyển sang điền câu, gõ từ và nghe. Từ quên sẽ quay lại sau vài thẻ.</p>
+        <p className="mt-2 text-xs text-slate-500">Mặc định: mọi thẻ tự gõ đáp án (gõ từ theo nghĩa hoặc điền câu), không có trắc nghiệm. Chọn “Tự động” nếu muốn từ mới làm trắc nghiệm trước, từ nhớ lâu mới chuyển sang gõ và nghe. Từ quên sẽ quay lại sau vài thẻ.</p>
         <div className="mt-3"><Btn disabled={total === 0} onClick={() => onStart({ items: plan.items, practice: false, forced })}>Bắt đầu ôn ({total} thẻ)</Btn></div>
       </Card>
 

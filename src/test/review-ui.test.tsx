@@ -40,6 +40,7 @@ describe('Ôn tập: phiên ôn tính lịch', () => {
     const u = user()
     const repo = await setup()
     await setNew(u, '1')
+    await u.selectOptions(screen.getByLabelText('Kiểu ôn'), 'auto')
     await u.click(screen.getByRole('button', { name: /Bắt đầu ôn \(1 thẻ\)/ }))
     expect(await screen.findByText('Từ mới')).toBeInTheDocument()
     await u.click(screen.getByRole('button', { name: 'Đã xem, kiểm tra tôi' }))
@@ -61,6 +62,7 @@ describe('Ôn tập: phiên ôn tính lịch', () => {
     const u = user()
     const repo = await setup()
     await setNew(u, '1')
+    await u.selectOptions(screen.getByLabelText('Kiểu ôn'), 'auto')
     await u.click(screen.getByRole('button', { name: /Bắt đầu ôn/ }))
     await u.click(await screen.findByRole('button', { name: 'Đã xem, kiểm tra tôi' }))
     await screen.findByText('Chọn nghĩa')
@@ -131,6 +133,24 @@ describe('Ôn tập: phiên ôn tính lịch', () => {
       expect(c.intervalDays).toBeGreaterThanOrEqual(2.8) // 3 ngày ± 5% xê dịch
       expect(c.intervalDays).toBeLessThanOrEqual(3.2)
     })
+  })
+})
+
+describe('Ôn tập: gõ tiếng Anh theo nghĩa tiếng Việt', () => {
+  it('từ mới: hiện nghĩa và câu ví dụ tiếng Việt, không có đáp án để chọn, gõ đúng được chấm', async () => {
+    const u = user()
+    const repo = await setup()
+    await setNew(u, '1')
+    expect(screen.getByLabelText('Kiểu ôn')).toHaveValue('type') // mặc định
+    await u.click(screen.getByRole('button', { name: /Bắt đầu ôn/ }))
+    await u.click(await screen.findByRole('button', { name: 'Đã xem, kiểm tra tôi' }))
+    await screen.findByLabelText('Câu trả lời')
+    expect(screen.queryByRole('radiogroup')).not.toBeInTheDocument()
+    expect(screen.getByText(/Tôi đã đính kèm hợp đồng đã ký/)).toBeInTheDocument() // câu ví dụ tiếng Việt
+    await u.type(screen.getByLabelText('Câu trả lời'), 'attach')
+    await u.click(screen.getByRole('button', { name: 'Kiểm tra' }))
+    expect(screen.getByText('Đúng.')).toBeInTheDocument()
+    await waitFor(async () => expect((await lone(repo))[0]).toMatchObject({ reps: 1 }))
   })
 })
 
