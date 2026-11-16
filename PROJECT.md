@@ -38,9 +38,9 @@ src/
   types.ts                 Kiểu dữ liệu (bài học, từ vựng, bài tập, tiến độ)
   data/
     programs.ts            2 chương trình
-    lessons.ts             Danh mục 30 bài + gom từ vựng
-    lesson-email.ts        Bài mẫu 1 (đầy đủ)
-    lesson-variance.ts     Bài mẫu 2 (đầy đủ)
+    lessons.ts             Danh mục 30 bài + gom từ vựng; bài đủ nội dung thay mục cùng id
+    lesson-*.ts            10 bài đầy đủ: office-01..05 (email, chào hỏi, điện thoại, lịch họp, điều hành họp),
+                           finance-01..05 (variance, báo cáo TC, khóa sổ, AP/AR, dòng tiền)
   lib/
     srs.ts                 Thuật toán lịch ôn, từ khó, dự báo
     review.ts              Kiểu ôn, dựng câu hỏi, chấm gõ, quy đổi mức, hàng đợi phiên ôn
@@ -66,8 +66,8 @@ public/                    Biểu tượng PWA
 ```
 
 ## Cách thêm một bài học
-1. Sao chép `src/data/lesson-email.ts`, đổi `id`, `title`, nội dung.
-2. Trong `src/data/lessons.ts`, thay mục danh mục tương ứng bằng bài mới (giữ `id` dạng `office-NN` / `finance-NN`).
+1. Sao chép một file `src/data/lesson-*.ts`, đổi `id`, `title`, nội dung.
+2. Trong `src/data/lessons.ts`, import bài mới và thêm vào mảng `full` (giữ `id` dạng `office-NN` / `finance-NN`, khớp thứ tự trong danh mục).
 3. Mỗi bài cần: 3+ phần giải thích song ngữ, 10 từ vựng, đủ 4 loại bài tập. `npm test` sẽ báo nếu thiếu.
 
 ## Đồng bộ (đã code, cần thiết lập một lần)
@@ -79,7 +79,7 @@ Khi thương mại hóa: bật xác nhận email + SMTP riêng, thêm "quên m�
 - Chấm gõ không nhận từ đồng nghĩa; "gần đúng" chỉ cho từ từ 5 ký tự (sai 1 ký tự).
 - Câu điền chỗ trống chỉ có khi ví dụ chứa từ (chấp nhận biến thể ngắn như attach → attached); dạng bất quy tắc (overspend → overspent) sẽ không có kiểu này.
 - Kiểu "Nghe và gõ" phụ thuộc giọng đọc của thiết bị, chưa thử trên thiết bị thật; trình duyệt có thể chặn tự phát âm (bấm "Nghe lại").
-- 28/30 bài mới là danh mục, chưa có nội dung.
+- 20/30 bài mới là danh mục, chưa có nội dung. 8 bài mới soạn chưa có người học thật đọc lại; nên rà thuật ngữ và ví dụ.
 - Luyện viết chưa kiểm tra ngữ pháp.
 - Đồng bộ mới kiểm thử bằng kho giả và client giả, **chưa chạy với Supabase thật** (cần dự án Supabase của chủ dự án).
 - Gộp theo từng từ/buổi học; mục tiêu ngày và bài viết xung đột thì bên sửa gần nhất thắng.
@@ -88,16 +88,16 @@ Khi thương mại hóa: bật xác nhận email + SMTP riêng, thêm "quên m�
 - Phát âm phụ thuộc giọng đọc của thiết bị.
 - Từ nhập từ file chưa sửa được sau khi lưu (chỉ xóa rồi nhập lại).
 - Không có OCR cho PDF scan; không đọc .doc/.xls cũ.
-- Cụm từ chỉ gồm 2–3 từ liền nhau, lặp ≥2 lần; chưa trích cụm có giới từ ("segregation of duties"). Chưa lemmatize đầy đủ.
+- Cụm từ: 2–3 từ liền nhau, hoặc từ + giới từ (of/for/in/on/with/by/from/against/between) + từ, lặp ≥2 lần. Không nhận cụm có "the" xen giữa ("review of the accounts"), không có "to". Chưa lemmatize đầy đủ.
 - Bảng thuật ngữ `src/data/glossary.ts` mới ~60 mục; cần mở rộng dần.
 - Phụ thuộc 2 dịch vụ miễn phí bên thứ ba; có thể đổi điều khoản/giới hạn.
 - Đọc PDF cần trình duyệt đời mới; chưa thử trên iPhone/Safari thật.
 
 ## Việc tiếp theo (đề xuất theo thứ tự)
 1. Chủ dự án dùng thử 1 tuần, ghi lại điểm khó dùng.
-2. Soạn thêm 8 bài (4 Office, 4 Finance) theo mẫu.
+2. ~~Soạn thêm 8 bài~~ (xong, office-02..05, finance-02..05). Còn 20 bài; đề xuất tiếp: Internal Controls Basics (finance-08), Audit Communication (finance-09), Giving & Receiving Feedback (office-07).
 3. ~~Triển khai HTTPS miễn phí~~ (xong) GitHub Pages qua GitHub Actions (đã thêm workflow; cần bật Source = GitHub Actions một lần).
-4. Thiết lập Supabase thật theo README và kiểm tra đồng bộ máy tính ↔ điện thoại.
+4. **Chủ dự án làm** (Claude không có quyền vào tài khoản Supabase): thiết lập Supabase thật theo README và kiểm tra đồng bộ máy tính ↔ điện thoại.
 6. Cân nhắc AI chấm viết khi có ngân sách.
 
 ## Nhật ký
@@ -107,3 +107,4 @@ Khi thương mại hóa: bật xác nhận email + SMTP riêng, thêm "quên m�
 - 2026-11-16: Thêm trích cụm từ (2–3 từ) và bảng thuật ngữ tài chính tự soạn.
 - 2026-11-16: Thêm đồng bộ Supabase, gộp dữ liệu, sao lưu file. 63+ kiểm thử đạt; chưa thử với Supabase thật.
 - 2026-11-16: Ôn tập đa dạng 6 kiểu, hàng đợi học lại, luyện thêm, dự báo 7 ngày. 101 kiểm thử đạt; đã chạy đủ 6 kiểu trên Chromium.
+- 2026-11-16: Thêm 8 bài đầy đủ (office-02..05, finance-02..05), trích cụm có giới từ nối. 107 kiểm thử đạt. Sửa bài mẫu bv-w1: câu mẫu thiếu cụm nguyên nhân mà bộ chấm yêu cầu. Supabase thật: chưa làm (cần tài khoản của chủ dự án).

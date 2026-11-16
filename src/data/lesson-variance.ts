@@ -86,7 +86,7 @@ export const varianceLesson: Lesson = {
         scenarioEn: 'Marketing spend is USD 30k (20%) over budget because of an unplanned campaign. Explain the cause, the full-year effect and your proposal to the Finance Director.',
         minWords: 60,
         requiredPhrases: [['over budget', 'exceeded'], ['due to', 'driven by', 'because of'], ['full-year', 'forecast', 'year-end'], ['suggest', 'recommend', 'propose']],
-        modelAnswer: 'Subject: Marketing variance – May\n\nDear Ms Linh,\n\nMarketing spend is USD 30k (20%) over budget year-to-date. The main driver is an unplanned campaign launched in May.\n\nIf spending continues at this rate, we expect a full-year overspend of USD 45k, which would reduce operating profit by 1.2%.\n\nI recommend freezing new campaigns in Q3. The marketing lead will confirm the revised plan by Friday.\n\nBest regards,\nMinh',
+        modelAnswer: 'Subject: Marketing variance – May\n\nDear Ms Linh,\n\nMarketing spend is USD 30k (20%) over budget year-to-date. The overspend is due to an unplanned campaign launched in May.\n\nIf spending continues at this rate, we expect a full-year overspend of USD 45k, which would reduce operating profit by 1.2%.\n\nI recommend freezing new campaigns in Q3. The marketing lead will confirm the revised plan by Friday.\n\nBest regards,\nMinh',
       },
     ],
   },

@@ -1,6 +1,14 @@
 import type { Lesson, ProgramId, VocabItem } from '../types'
 import { emailLesson } from './lesson-email'
 import { varianceLesson } from './lesson-variance'
+import { greetingsLesson } from './lesson-greetings'
+import { phoneLesson } from './lesson-phone'
+import { schedulingLesson } from './lesson-scheduling'
+import { meetingsLesson } from './lesson-meetings'
+import { statementsLesson } from './lesson-statements'
+import { closeLesson } from './lesson-close'
+import { payablesLesson } from './lesson-payables'
+import { cashflowLesson } from './lesson-cashflow'
 
 type Planned = [title: string, titleVi: string, level: Lesson['level'], summaryVi: string]
 
@@ -50,11 +58,19 @@ const toLessons = (program: ProgramId, plan: Planned[], prefix: string): Lesson[
     summaryVi,
   }))
 
+/** Bài đã có nội dung đầy đủ; thay mục danh mục cùng id. */
+const full: Lesson[] = [
+  greetingsLesson, phoneLesson, schedulingLesson, meetingsLesson,
+  statementsLesson, closeLesson, payablesLesson, cashflowLesson,
+]
+const fullById = new Map(full.map((l) => [l.id, l]))
+const withContent = (list: Lesson[]) => list.map((l) => fullById.get(l.id) ?? l)
+
 export const lessons: Lesson[] = [
   emailLesson,
-  ...toLessons('office', officePlan, 'office'),
+  ...withContent(toLessons('office', officePlan, 'office')),
   varianceLesson,
-  ...toLessons('finance', financePlan, 'finance'),
+  ...withContent(toLessons('finance', financePlan, 'finance')),
 ]
 
 export const lessonsByProgram = (p: ProgramId) => lessons.filter((l) => l.program === p)

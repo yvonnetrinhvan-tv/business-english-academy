@@ -3,6 +3,7 @@ import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import App from '../App'
+import { allVocab } from '../data/lessons'
 import { StoreProvider } from '../lib/store'
 import { emptyState, LocalStorageRepository } from '../lib/storage'
 import type { CardState, ProgressState } from '../types'
@@ -29,7 +30,7 @@ describe('Ôn tập: màn hình chính', () => {
     await setup()
     expect(await screen.findByText('Đến hạn ôn')).toBeInTheDocument()
     expect(screen.getByRole('img', { name: /dự báo|Biểu đồ số thẻ/i })).toBeInTheDocument()
-    expect(screen.getByText(/Mức ghi nhớ \(20 từ\)/)).toBeInTheDocument()
+    expect(screen.getByText(new RegExp(`Mức ghi nhớ \\(${allVocab.length} từ\\)`))).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Bắt đầu ôn \(10 thẻ\)/ })).toBeInTheDocument()
   })
 })

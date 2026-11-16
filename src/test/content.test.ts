@@ -9,8 +9,36 @@ describe('nội dung', () => {
     expect(new Set(lessons.map((l) => l.id)).size).toBe(30)
   })
 
-  it('có đúng 2 bài mẫu đầy đủ', () => {
-    expect(lessons.filter((l) => l.content).map((l) => l.title).sort()).toEqual(['Budget Variance Analysis', 'Professional Email Writing'])
+  it('có 10 bài đầy đủ (5 mỗi chương trình, liền từ bài 1)', () => {
+    for (const prog of ['office', 'finance'] as const) {
+      const ready = lessons.filter((l) => l.program === prog && l.content).map((l) => l.order)
+      expect(ready).toEqual([1, 2, 3, 4, 5])
+    }
+    expect(lessons.filter((l) => l.content)).toHaveLength(10)
+  })
+
+  it('mỗi bài đủ 3+ phần, 10 từ, ≥ 10 bài tập', () => {
+    for (const l of lessons.filter((x) => x.content)) {
+      expect(l.content!.sections.length, l.id).toBeGreaterThanOrEqual(3)
+      expect(l.content!.vocab, l.id).toHaveLength(10)
+      expect(l.content!.exercises.length, l.id).toBeGreaterThanOrEqual(10)
+    }
+  })
+
+  it('đáp án điền từ và sắp xếp nhất quán, bài viết có mẫu đạt yêu cầu', () => {
+    for (const l of lessons.filter((x) => x.content)) {
+      for (const e of l.content!.exercises) {
+        if (e.type === 'writing') {
+          const m = e.modelAnswer.toLowerCase()
+          expect(m.split(/\s+/).length, e.id).toBeGreaterThanOrEqual(e.minWords)
+          for (const group of e.requiredPhrases) expect(group.some((p) => m.includes(p)), `${e.id}: ${group}`).toBe(true)
+        }
+        if (e.type === 'fill') {
+          const full = e.prompt.replace('___', e.answers[0])
+          expect(full, e.id).not.toContain('___')
+        }
+      }
+    }
   })
 
   it('từ vựng đủ trường, id duy nhất', () => {
